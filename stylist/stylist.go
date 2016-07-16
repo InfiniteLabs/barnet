@@ -10,16 +10,11 @@ type StylistId xid.ID
 
 type Stylist struct {
 	StylistId StylistId
-	Name      Name
+	Name      string
 	Pitch     string
 }
 
-type Name struct {
-	FirstName string
-	Surname   string
-}
-
-func New(name Name, pitch string) *Stylist {
+func New(name string, pitch string) *Stylist {
 	guid := xid.New()
 
 	return &Stylist{
