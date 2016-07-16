@@ -3,6 +3,7 @@ package repository
 import (
 	"sync"
 
+	"github.com/davidwilde/barnet/client"
 	"github.com/davidwilde/barnet/stylist"
 )
 
@@ -40,5 +41,31 @@ func (r *stylistRepository) FindAll() []*stylist.Stylist {
 func NewInMemStylist() stylist.Repository {
 	return &stylistRepository{
 		stylists: make(map[stylist.StylistId]*stylist.Stylist),
+	}
+}
+
+type clientRepository struct {
+	mtx     sync.RWMutex
+	clients map[client.ClientId]*client.Client
+}
+
+func (r *clientRepository) Store(c *client.Client) error {
+	r.mtx.RLock()
+	defer r.mtx.Unlock()
+	r.clients[c.ClientId] = c
+	return nil
+}
+
+func (r *clientRepository) Find(clientId client.ClientId) (*client.Client, error) {
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
+	if val, ok := r.clients[clientId]; ok {
+		return val, nil
+	}
+	return nil, client.ErrUnknown
+}
+func NewInMemClient() client.Repository {
+	return &clientRepository{
+		clients: make(map[client.ClientId]*client.Client),
 	}
 }

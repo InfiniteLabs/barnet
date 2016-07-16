@@ -16,7 +16,7 @@ var _ = Suite(&S{})
 func (s *S) TestBookNewAppointment(c *C) {
 
 	var (
-		clientRepository      = repository.NewInMemclient()
+		clientRepository      = repository.NewInMemClient()
 		stylistRepository     = repository.NewInMemStylist()
 		appointmentRepository = repository.NewInMemApointment()
 	)
