@@ -9,10 +9,8 @@ import (
 	"github.com/rs/xid"
 )
 
-type AppointmentId xid.ID
-
 type Appointment struct {
-	AppointmentId   AppointmentId
+	AppointmentId   xid.ID
 	AppointmentTime time.Time
 	Client          client.Client
 	Stylist         stylist.Stylist
@@ -22,7 +20,7 @@ func New(appointmentTime time.Time, client client.Client, stylist stylist.Stylis
 	guid := xid.New()
 
 	return &Appointment{
-		AppointmentId: AppointmentId(guid),
+		AppointmentId: guid,
 		Client:        client,
 		Stylist:       stylist,
 	}
@@ -30,7 +28,7 @@ func New(appointmentTime time.Time, client client.Client, stylist stylist.Stylis
 
 type Repository interface {
 	Store(appointment *Appointment) error
-	Find(appointmentId AppointmentId) (*Appointment, error)
+	Find(appointmentId xid.ID) (*Appointment, error)
 }
 
 var ErrUnknown = errors.New("unknown appointment")

@@ -6,6 +6,7 @@ import (
 	"github.com/davidwilde/barnet/appointment"
 	"github.com/davidwilde/barnet/client"
 	"github.com/davidwilde/barnet/stylist"
+	"github.com/rs/xid"
 )
 
 type stylistRepository struct {
@@ -74,17 +75,17 @@ func NewInMemClient() client.Repository {
 
 type appointmentRepository struct {
 	mtx          sync.RWMutex
-	appointments map[appointment.AppointmentId]*appointment.Appointment
+	appointments map[xid.ID]*appointment.Appointment
 }
 
 func (r *appointmentRepository) Store(a *appointment.Appointment) error {
-	r.mtx.RLock()
+	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	r.appointments[a.AppointmentId] = a
 	return nil
 }
 
-func (r *appointmentRepository) Find(appointmentId appointment.AppointmentId) (*appointment.Appointment, error) {
+func (r *appointmentRepository) Find(appointmentId xid.ID) (*appointment.Appointment, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	if val, ok := r.appointments[appointmentId]; ok {
@@ -95,6 +96,6 @@ func (r *appointmentRepository) Find(appointmentId appointment.AppointmentId) (*
 
 func NewInMemAppointment() appointment.Repository {
 	return &appointmentRepository{
-		appointments: make(map[appointment.AppointmentId]*appointment.Appointment),
+		appointments: make(map[xid.ID]*appointment.Appointment),
 	}
 }
