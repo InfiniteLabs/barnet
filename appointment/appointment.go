@@ -20,15 +20,17 @@ func New(appointmentTime time.Time, client client.Client, stylist stylist.Stylis
 	guid := xid.New()
 
 	return &Appointment{
-		AppointmentId: guid,
-		Client:        client,
-		Stylist:       stylist,
+		AppointmentId:   guid,
+		AppointmentTime: appointmentTime,
+		Client:          client,
+		Stylist:         stylist,
 	}
 }
 
 type Repository interface {
 	Store(appointment *Appointment) error
 	Find(appointmentId xid.ID) (*Appointment, error)
+	FindStylistAtTime(stylist stylist.Stylist, time time.Time) (*Appointment, error)
 }
 
 var ErrUnknown = errors.New("unknown appointment")

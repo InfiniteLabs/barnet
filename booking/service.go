@@ -1,11 +1,13 @@
 package booking
 
 import (
+	"errors"
+	"time"
+
 	"github.com/davidwilde/barnet/appointment"
 	"github.com/davidwilde/barnet/client"
 	"github.com/davidwilde/barnet/stylist"
 	"github.com/rs/xid"
-	"time"
 )
 
 type Service interface {
@@ -19,7 +21,14 @@ type service struct {
 }
 
 func (s *service) BookNewAppointment(client client.Client, stylist stylist.Stylist, appointmentTime time.Time) (xid.ID, error) {
+	val, err := s.appointments.FindStylistAtTime(stylist, appointmentTime)
+	if err != nil {
+		panic(err)
+	}
 	appointment := appointment.New(appointmentTime, client, stylist)
+	if val != nil {
+		return appointment.AppointmentId, errors.New("Cannot make duplicate appointment")
+	}
 	s.appointments.Store(appointment)
 	return appointment.AppointmentId, nil
 }

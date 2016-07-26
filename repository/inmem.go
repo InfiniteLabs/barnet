@@ -2,6 +2,7 @@ package repository
 
 import (
 	"sync"
+	"time"
 
 	"github.com/davidwilde/barnet/appointment"
 	"github.com/davidwilde/barnet/client"
@@ -92,6 +93,19 @@ func (r *appointmentRepository) Find(appointmentId xid.ID) (*appointment.Appoint
 		return val, nil
 	}
 	return nil, appointment.ErrUnknown
+}
+
+func (r *appointmentRepository) FindStylistAtTime(stylist stylist.Stylist, appointmentTime time.Time) (*appointment.Appointment, error) {
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
+	// TODO: There is probably a better data structure to this which would involve mapping to a stylist
+	// and sorting by appointment date. This way a binary search could occur on an appointment date.
+	for _, v := range r.appointments {
+		if v.Stylist.StylistId == stylist.StylistId && v.AppointmentTime == appointmentTime {
+			return v, nil
+		}
+	}
+	return nil, nil
 }
 
 func NewInMemAppointment() appointment.Repository {
