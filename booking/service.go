@@ -10,6 +10,8 @@ import (
 	"github.com/rs/xid"
 )
 
+var ErrInvalidArgument = errors.New("Invalid Argument")
+
 type Service interface {
 	BookNewAppointment(client client.Client, stylist stylist.Stylist, appointmentTime time.Time) (xid.ID, error)
 }
@@ -21,6 +23,9 @@ type service struct {
 }
 
 func (s *service) BookNewAppointment(client client.Client, stylist stylist.Stylist, appointmentTime time.Time) (xid.ID, error) {
+	if appointmentTime.IsZero() {
+		return nil, ErrInvalidArgument
+	}
 	val, err := s.appointments.FindStylistAtTime(stylist, appointmentTime)
 	if err != nil {
 		panic(err)
