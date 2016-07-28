@@ -18,12 +18,12 @@ func TestBookNewAppointment(t *testing.T) {
 	)
 
 	var bookingService = NewService(appointmentRepository, clientRepository, stylistRepository)
-	stylist := stylist.New("Alice", "I love cutting hair")
-	client := client.New("bob@testing.com", "Bob McTest", "Bob", "Male", "555-1234")
+	s := stylist.New("Alice", "I love cutting hair")
+	c := client.Client{ClientId: "123", EmailAddress: "bob@testing.com", FullName: "Bob McTest"}
 
 	appointmentTime := time.Date(2016, time.November, 10, 11, 0, 0, 0, time.UTC)
 
-	appointmentId, err := bookingService.BookNewAppointment(*client, *stylist, appointmentTime)
+	appointmentId, err := bookingService.BookNewAppointment(c.ClientId, s.StylistId, appointmentTime)
 
 	if err != nil {
 		t.Error("Could not save an appointment")
@@ -50,13 +50,13 @@ func TestBookNewAppointmentTimeUnavailable(t *testing.T) {
 
 	var bookingService = NewService(appointmentRepository, clientRepository, stylistRepository)
 	stylist := stylist.New("Alice", "I love cutting hair")
-	firstClient := client.New("bob@testing.com", "Bob McTest", "Bob", "Male", "555-1234")
-	secondClient := client.New("charles@testing.com", "Charles Von Test", "Charlie", "Male", "555-4321")
+	firstC := client.Client{ClientId: "123", EmailAddress: "bob@testing.com", FullName: "Bob McTest"}
+	secondC := client.Client{ClientId: "456", EmailAddress: "charles@testing.com", FullName: "Charles Von Test"}
 
 	appointmentTime := time.Date(2016, time.November, 10, 11, 0, 0, 0, time.UTC)
 
-	_, err := bookingService.BookNewAppointment(*firstClient, *stylist, appointmentTime)
-	_, err = bookingService.BookNewAppointment(*secondClient, *stylist, appointmentTime)
+	_, err := bookingService.BookNewAppointment(firstC.ClientId, stylist.StylistId, appointmentTime)
+	_, err = bookingService.BookNewAppointment(secondC.ClientId, stylist.StylistId, appointmentTime)
 
 	if err == nil {
 		t.Error("Duplicate appointment should not be saved")

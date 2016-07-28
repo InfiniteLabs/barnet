@@ -7,7 +7,6 @@ import (
 	"github.com/davidwilde/barnet/appointment"
 	"github.com/davidwilde/barnet/client"
 	"github.com/davidwilde/barnet/stylist"
-	"github.com/rs/xid"
 )
 
 type stylistRepository struct {
@@ -76,7 +75,7 @@ func NewInMemClient() client.Repository {
 
 type appointmentRepository struct {
 	mtx          sync.RWMutex
-	appointments map[xid.ID]*appointment.Appointment
+	appointments map[appointment.AppointmentID]*appointment.Appointment
 }
 
 func (r *appointmentRepository) Store(a *appointment.Appointment) error {
@@ -86,7 +85,7 @@ func (r *appointmentRepository) Store(a *appointment.Appointment) error {
 	return nil
 }
 
-func (r *appointmentRepository) Find(appointmentId xid.ID) (*appointment.Appointment, error) {
+func (r *appointmentRepository) Find(appointmentId appointment.AppointmentID) (*appointment.Appointment, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	if val, ok := r.appointments[appointmentId]; ok {
@@ -95,13 +94,13 @@ func (r *appointmentRepository) Find(appointmentId xid.ID) (*appointment.Appoint
 	return nil, appointment.ErrUnknown
 }
 
-func (r *appointmentRepository) FindStylistAtTime(stylist stylist.Stylist, appointmentTime time.Time) (*appointment.Appointment, error) {
+func (r *appointmentRepository) FindStylistAtTime(stylistId stylist.StylistId, appointmentTime time.Time) (*appointment.Appointment, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	// TODO: There is probably a better data structure to this which would involve mapping to a stylist
 	// and sorting by appointment date. This way a binary search could occur on an appointment date.
 	for _, v := range r.appointments {
-		if v.Stylist.StylistId == stylist.StylistId && v.AppointmentTime == appointmentTime {
+		if v.StylistId == stylistId && v.AppointmentTime == appointmentTime {
 			return v, nil
 		}
 	}
@@ -110,6 +109,6 @@ func (r *appointmentRepository) FindStylistAtTime(stylist stylist.Stylist, appoi
 
 func NewInMemAppointment() appointment.Repository {
 	return &appointmentRepository{
-		appointments: make(map[xid.ID]*appointment.Appointment),
+		appointments: make(map[appointment.AppointmentID]*appointment.Appointment),
 	}
 }

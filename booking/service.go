@@ -7,13 +7,12 @@ import (
 	"github.com/davidwilde/barnet/appointment"
 	"github.com/davidwilde/barnet/client"
 	"github.com/davidwilde/barnet/stylist"
-	"github.com/rs/xid"
 )
 
 var ErrInvalidArgument = errors.New("Invalid Argument")
 
 type Service interface {
-	BookNewAppointment(client client.Client, stylist stylist.Stylist, appointmentTime time.Time) (xid.ID, error)
+	BookNewAppointment(client client.ClientId, stylist stylist.StylistId, appointmentTime time.Time) (appointment.AppointmentID, error)
 }
 
 type service struct {
@@ -22,20 +21,24 @@ type service struct {
 	stylists     stylist.Repository
 }
 
-func (s *service) BookNewAppointment(client client.Client, stylist stylist.Stylist, appointmentTime time.Time) (xid.ID, error) {
+func (s *service) BookNewAppointment(clientId client.ClientId, stylistId stylist.StylistId, appointmentTime time.Time) (appointment.AppointmentID, error) {
 	if appointmentTime.IsZero() {
-		return nil, ErrInvalidArgument
+		return "", ErrInvalidArgument
 	}
-	val, err := s.appointments.FindStylistAtTime(stylist, appointmentTime)
+	val, err := s.appointments.FindStylistAtTime(stylistId, appointmentTime)
 	if err != nil {
 		panic(err)
 	}
-	appointment := appointment.New(appointmentTime, client, stylist)
+	a := appointment.New(appointmentTime, clientId, stylistId)
+	a.AppointmentId = appointment.NextAppointmentID()
+
 	if val != nil {
-		return appointment.AppointmentId, errors.New("Cannot make duplicate appointment")
+		return "", errors.New("Cannot make duplicate appointment")
 	}
-	s.appointments.Store(appointment)
-	return appointment.AppointmentId, nil
+	if err := s.appointments.Store(a); err != nil {
+		return "", err
+	}
+	return a.AppointmentId, nil
 }
 
 func NewService(ar appointment.Repository, cr client.Repository, sr stylist.Repository) Service {

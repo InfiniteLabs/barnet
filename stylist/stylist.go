@@ -6,7 +6,7 @@ import (
 	"github.com/rs/xid"
 )
 
-type StylistId xid.ID
+type StylistId string
 
 type Stylist struct {
 	StylistId StylistId
@@ -18,7 +18,7 @@ func New(name string, pitch string) *Stylist {
 	guid := xid.New()
 
 	return &Stylist{
-		StylistId: StylistId(guid),
+		StylistId: StylistId(guid.String()),
 		Name:      name,
 		Pitch:     pitch,
 	}

@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/davidwilde/barnet/client"
+	"github.com/davidwilde/barnet/stylist"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/rs/xid"
 	"golang.org/x/net/context"
 
 	"github.com/davidwilde/barnet/appointment"
@@ -40,8 +41,8 @@ var errBadRoute = errors.New("bad route")
 
 func decodeBookAppointmentRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var body struct {
-		Client          string    `json:"origin"`
-		Stylist         string    `json:"stylist"`
+		ClientId        string    `json:"client_id"`
+		StylistId       string    `json:"stylist_id"`
 		AppointmentTime time.Time `json:"appointment_time"`
 	}
 
@@ -49,19 +50,9 @@ func decodeBookAppointmentRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	clientId, err := xid.FromString(body.Client)
-	if err != nil {
-		return nil, err
-	}
-	stylistId, err := xid.FromString(body.Stylist)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return bookAppointmentRequest{
-		Client:          clientId,
-		Stylist:         stylistId,
+		ClientId:        client.ClientId(body.ClientId),
+		StylistId:       stylist.StylistId(body.StylistId),
 		AppointmentTime: body.AppointmentTime,
 	}, nil
 }
