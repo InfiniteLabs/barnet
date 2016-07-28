@@ -73,7 +73,7 @@ type errorer interface {
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
 	case appointment.ErrUnknown:
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusInternalServerError)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)
 	default:

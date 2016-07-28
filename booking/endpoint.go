@@ -10,9 +10,9 @@ import (
 )
 
 type bookAppointmentRequest struct {
-	ClientId        client.ClientId   `json:"clientId"`
-	StylistId       stylist.StylistId `json:"stylistId"`
-	AppointmentTime time.Time         `json:"appointmentTime"`
+	ClientId        client.ClientId
+	StylistId       stylist.StylistId
+	AppointmentTime time.Time
 }
 
 type bookAppointmentResponse struct {
